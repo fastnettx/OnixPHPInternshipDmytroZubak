@@ -90,6 +90,30 @@ abstract class Product
         }
     }
 
+    public static function iterableProductAnonymousClass()
+    {
+        foreach (self::$products as $product) {
+            $element = new class($product->name, $product->price, $product->owner) {
+                private $name;
+                private $price;
+                private $user;
+
+                public function __construct($name, $price, $user)
+                {
+                    $this->name = $name;
+                    $this->price = $price;
+                    $this->user = $user;
+                }
+
+                public function __toString()
+                {
+                    return 'Наименование - ' . $this->name . ', цена - ' . $this->price . ', имя пользователя - ' . $this->user . ';' . PHP_EOL;
+                }
+            };
+            echo $element;
+        }
+    }
+
 }
 
 
@@ -128,5 +152,7 @@ Product::registerProduct($prod2);
 Product::registerProduct($prod3);
 
 Product::iterableProduct();
+Product::iterableProductAnonymousClass();
+
 
 
