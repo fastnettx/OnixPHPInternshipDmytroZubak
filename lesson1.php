@@ -1,4 +1,5 @@
 <?php
+namespace user;
 
 class User
 {
@@ -36,8 +37,8 @@ class User
 
     public function printStatus()
     {
-        echo 'У пользователя ' . $this->getName() . ' сейчас на счету - ' . $this->getBalance() . '$';
-        echo ' <br/>';
+        echo 'У пользователя ' . $this->getName() . ' сейчас на счету - ' . $this->getBalance() . '$'. PHP_EOL;
+
     }
 
     public function giveMoney($sum, $obj2)
@@ -53,18 +54,8 @@ class User
     }
 
 }
-
-$user1 = new User('Ivan', 500);
-$user2 = new User('Vovan', 5000);
-
+$user1 = new User('Dima', 1200);
 $user1->printStatus();
-$user2->printStatus();
-$user1->giveMoney(200, $user2);
 $user1->printStatus();
-$user2->printStatus();
-$user2->giveMoney(1500, $user1);
-$user1->printStatus();
-$user2->printStatus();
-$user2->giveMoney(15000, $user1);
 
 
