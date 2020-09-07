@@ -1,6 +1,6 @@
 <?php
 
-namespace user_product;
+namespace lesson3;
 
 class User
 {
@@ -54,6 +54,34 @@ class User
         }
     }
 
+    public function listProducts($product_register)
+    {
+        $products = array();
+        foreach ($product_register as $product) {
+            if ($product->getUser() == $this->name) {
+                $products[] = $product;
+            }
+        }
+        return $products;
+    }
+
+    public function sellProduct(Product $product, User $user)
+    {
+        if ($product->getPrice() <= $user->getBalance() && $product->getUser() == $this->name) {
+            $this->balance += $product->getPrice();
+            $user->removeFromAccount($product->getPrice());
+            $product->setUser($user);
+            echo "Пользователь, {$this->name} продал продукт {$product->getName()} (цена - {$product->getPrice()} ), 
+            пользователю {$user->getName()} " . PHP_EOL;
+        } elseif ($product->getPrice() > $user->getBalance()) {
+            echo "Пользователь, {$this->name} не может перечислить  {$product->getPrice()} , 
+            пользователю {$user->getName()}  так как имеет только {$this->balance}" . PHP_EOL;
+        } elseif ($product->getUser() !== $this->name) {
+
+            echo "Пользователь, {$this->name} не может продать продукт {$product->getName()} 
+            (цена - {$product->getPrice()} ),  так как он принадлежит пользователю {$user->getName()} " . PHP_EOL;
+        }
+    }
 }
 
 abstract class Product
@@ -68,26 +96,46 @@ abstract class Product
         $this->name = $name;
         $this->price = $price;
         $this->owner = $owner;
+        static::registerProduct($this);
     }
 
-
-    public static function registerProduct($product)
+    private static function registerProduct($product)
     {
         if (!in_array($product, self::$products)) {
             self::$products[] = $product;
         }
     }
 
+    abstract public static function createRandomProduct(User $user);
+
     public function __toString()
     {
         return 'Наименование - ' . $this->name . ', цена - ' . $this->price . ', имя пользователя - ' . $this->owner . ';' . PHP_EOL;
     }
 
-    public static function iterableProduct()
+    public static function ProductRegister()
     {
-        foreach (self::$products as $product) {
-            echo $product;
-        }
+        return self::$products;
+    }
+
+    public function getUser()
+    {
+        return $this->owner;
+    }
+
+    public function setUser(User $user)
+    {
+        $this->owner = $user;
+    }
+
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    public function getName()
+    {
+        return $this->name;
     }
 
     public static function iterableProductAnonymousClass()
@@ -113,7 +161,6 @@ abstract class Product
             echo $element;
         }
     }
-
 }
 
 
@@ -125,6 +172,14 @@ class  Processor extends Product
     {
         parent::__construct($name, $price, $owner);
         $this->frequency = $frequency;
+    }
+
+    public static function createRandomProduct(User $user)
+    {
+        $name = str_shuffle('abcdefg');
+        $price = rand(100, 10000);
+        $frequency = rand(10000, 150000);;
+        return new Processor($name, $price, $user, $frequency);
     }
 }
 
@@ -139,20 +194,31 @@ class Ram extends Product
         $this->type = $type;
         $this->memory = $memory;
     }
+
+    public static function createRandomProduct(User $user)
+    {
+        $name = str_shuffle('abcdefg');
+        $price = rand(10, 5000);;
+        $type = mb_substr(str_shuffle('ddrdim123'), 0, 3);
+        $memory = rand(128, 10000);
+        return new Ram($name, $price, $user, $type, $memory);
+    }
 }
 
-$user1 = new User('Ivan', 1200);
-$user2 = new User('Sergey', 1200);
-$prod1 = new Processor('i3', 100, $user1, 10000);
-$prod2 = new Ram('samsung', 500, $user1, 'DDR1', 1024);
-$prod3 = new Processor('i5', 200, $user2, 50000);;
+$user1 = new User('Ivan', 1000);
+$user2 = new User('Sergey', 1500);
+$prod1 = new Processor('i3', 500, $user1, 10000);
+$prod2 = new Ram('samsung', 500, $user2, 'DDR1', 1024);
+$prod3 = Processor::createRandomProduct($user1);
+$prod4 = Ram::createRandomProduct($user2);
 
-Product::registerProduct($prod1);
-Product::registerProduct($prod2);
-Product::registerProduct($prod3);
+$reg = Product::ProductRegister();
+$user1->listProducts($reg);
 
-Product::iterableProduct();
-Product::iterableProductAnonymousClass();
+$user1->sellProduct($prod3, $user2);
+$user2->sellProduct($prod4, $user1);
+
+
 
 
 
