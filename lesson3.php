@@ -58,16 +58,17 @@ class User
     {
         $products = array();
         foreach ($product_register as $product) {
-            if ($product->getUser() == $this->name) {
+            if ($product->getUser() === $this) {
                 $products[] = $product;
             }
         }
         return $products;
+
     }
 
     public function sellProduct(Product $product, User $user)
     {
-        if ($product->getPrice() <= $user->getBalance() && $product->getUser() == $this->name) {
+        if ($product->getPrice() <= $user->getBalance() && $product->getUser() === $this) {
             $this->balance += $product->getPrice();
             $user->removeFromAccount($product->getPrice());
             $product->setUser($user);
@@ -76,7 +77,7 @@ class User
         } elseif ($product->getPrice() > $user->getBalance()) {
             echo "Пользователь, {$this->name} не может перечислить  {$product->getPrice()} , 
             пользователю {$user->getName()}  так как имеет только {$this->balance}" . PHP_EOL;
-        } elseif ($product->getUser() !== $this->name) {
+        } elseif ($product->getUser() !== $this) {
 
             echo "Пользователь, {$this->name} не может продать продукт {$product->getName()} 
             (цена - {$product->getPrice()} ),  так как он принадлежит пользователю {$user->getName()} " . PHP_EOL;
@@ -205,8 +206,8 @@ class Ram extends Product
     }
 }
 
-$user1 = new User('Ivan', 1000);
-$user2 = new User('Sergey', 1500);
+$user1 = new User('Ivan', 10000);
+$user2 = new User('Sergey', 15000);
 $prod1 = new Processor('i3', 500, $user1, 10000);
 $prod2 = new Ram('samsung', 500, $user2, 'DDR1', 1024);
 $prod3 = Processor::createRandomProduct($user1);
@@ -215,8 +216,8 @@ $prod4 = Ram::createRandomProduct($user2);
 $reg = Product::ProductRegister();
 $user1->listProducts($reg);
 
-$user1->sellProduct($prod3, $user2);
-$user2->sellProduct($prod4, $user1);
+$user1->sellProduct($prod4, $user2);
+$user2->sellProduct($prod3, $user1);
 
 
 
